@@ -8,6 +8,7 @@
 
 #include "glfw_context.hpp"
 #include "image_renderer.hpp"
+#include "libswscale/swscale.h"
 #include "window.hpp"
 
 #include "image.hpp"
@@ -24,7 +25,7 @@ extern "C"
 #include <libavformat/avformat.h>
 }
 
-Frame load_frame_1(const char *filename)
+Frame load_frame(const char *filename)
 {
     Frame result;
 
@@ -182,7 +183,7 @@ int main()
 
         ImageRenderer image_renderer{};
 
-        Frame frame = load_frame_1("./assets/test-video.mp4");
+        Frame frame = load_frame("./assets/test-video.mp4");
 
         while (window.is_open())
         {
