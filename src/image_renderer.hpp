@@ -1,15 +1,7 @@
 #pragma once
 
+#include "frame.hpp"
 #include "material.hpp"
-#include <inttypes.h>
-#include <vector>
-
-struct Frame
-{
-    uint32_t width;
-    uint32_t height;
-    std::vector<uint8_t> data;
-};
 
 class ImageRenderer
 {
