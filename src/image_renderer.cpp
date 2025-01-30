@@ -11,35 +11,6 @@ constexpr char *fragment_shader_path = "./shaders/horizontally_flipped_texture.f
 
 ImageRenderer::ImageRenderer() : m_material{vertex_shader_path, fragment_shader_path}
 {
-    /*float vertices[] = {*/
-    /*    // Pos              // Tex coords*/
-    /*    1.0f,  1.0f,  0.0f, 1.0f, 1.0f, // Top Right*/
-    /*    1.0f,  -1.0f, 0.0f, 1.0f, 0.0f, // Bottom Right*/
-    /*    -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, // Bottom Left*/
-    /*    -1.0f, 1.0f,  0.0f, 0.0f, 1.0f, // Top Left*/
-    /*};*/
-    /**/
-    /*m_indices = std::vector<uint32_t>{0, 1, 3, 1, 2, 3};*/
-
-    /*uint32_t vbo;*/
-    /*glGenVertexArrays(1, &m_vao);*/
-    /*glGenBuffers(1, &vbo);*/
-    /*glGenBuffers(1, &m_ebo);*/
-
-    /*glBindVertexArray(m_vao);*/
-
-    /*glBindBuffer(GL_ARRAY_BUFFER, vbo);*/
-    /*glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);*/
-
-    /*glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ebo);*/
-    /*glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * m_indices.size(), m_indices.data(), GL_STATIC_DRAW);*/
-
-    /*glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)0);*/
-    /*glEnableVertexAttribArray(0);*/
-    /**/
-    /*glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(3 * sizeof(float)));*/
-    /*glEnableVertexAttribArray(1);*/
-
     glGenTextures(1, &m_texture);
     glBindTexture(GL_TEXTURE_2D, m_texture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -57,6 +28,7 @@ void ImageRenderer::render(const Mesh &mesh, const Frame &frame, PerspectiveCame
     glm::mat4 view = camera.view();
 
     model = glm::scale(model, {2.0f, 1.0f, 2.0f});
+    model = glm::translate(model, {3.0f, 0.0f, 1.5f});
 
     int projection_loc = glGetUniformLocation(m_material.id(), "camera_projection");
     int model_loc = glGetUniformLocation(m_material.id(), "model");
