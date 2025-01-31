@@ -17,32 +17,49 @@ constexpr uint32_t window_height = 800;
 
 #include "video_reader.hpp"
 
-float delta_time = 0.016f;
+static float delta_time = 0.016f;
+static PerspectiveCamera camera{45.0f, ((float)window_width / (float)window_height), 0.01f, 100.0f};
+static bool quit = false;
 
 static void resize_callback(GLFWwindow *window, int width, int height)
 {
     glViewport(0, 0, width, height);
+    camera.set_aspect((float)width / (float)height);
+}
+
+static void scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
+{
+    camera.position.x += (float)yoffset * camera.move_speed;
+}
+
+static void mouse_callback(GLFWwindow *window, double xpos, double ypos)
+{
+    static float last_x = window_width / 2.0f, last_y = window_height / 2.0f;
+
+    float xoffset = xpos - last_x;
+    float yoffset = ypos - last_y;
+
+    last_x = xpos;
+    last_y = ypos;
+
+    if (xoffset >= 100.0f)
+        return;
+    if (yoffset >= 100.0f)
+        return;
+
+    constexpr float sensetivity = 0.1f;
+
+    xoffset *= sensetivity;
+    yoffset *= sensetivity;
+
+    camera.yaw += xoffset;
+    camera.pitch -= yoffset;
 }
 
 static void process_input(PerspectiveCamera &camera, GLFWwindow *window)
 {
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        camera.position += camera.move_speed * camera.forward() * delta_time;
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        camera.position -= camera.move_speed * camera.forward() * delta_time;
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        camera.position -= glm::normalize(glm::cross(camera.forward(), camera.up())) * camera.move_speed * delta_time;
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        camera.position += glm::normalize(glm::cross(camera.forward(), camera.up())) * camera.move_speed * delta_time;
-
-    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
-        camera.yaw -= camera.rotation_speed * delta_time;
-    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
-        camera.yaw += camera.rotation_speed * delta_time;
-    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-        camera.pitch += camera.rotation_speed * delta_time;
-    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-        camera.pitch -= camera.rotation_speed * delta_time;
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        quit = true;
 }
 
 int main()
@@ -55,6 +72,9 @@ int main()
         window.make_current_context();
 
         glfwSetFramebufferSizeCallback(window.window, resize_callback);
+        glfwSetScrollCallback(window.window, scroll_callback);
+        glfwSetInputMode(window.window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        glfwSetCursorPosCallback(window.window, mouse_callback);
 
         if (!gladLoadGL((GLADloadfunc)glfwGetProcAddress))
         {
@@ -63,12 +83,11 @@ int main()
         }
 
         ImageRenderer image_renderer{};
-        VideoReader video_reader{"./assets/test-video.mp4"};
-        PerspectiveCamera camera{45.0f, ((float)window_width / (float)window_height), 0.01f, 100.0f};
+        VideoReader video_reader{"./assets/wide-test.mp4"};
 
-        Mesh curved = generate_mesh_curved_plane(10000, 300, 160.0f);
+        Mesh curved = generate_mesh_curved_plane(1000, 300, 260.0f);
 
-        while (window.is_open())
+        while (window.is_open() && !quit)
         {
             static bool first_frame = true;
             if (first_frame)
@@ -83,7 +102,6 @@ int main()
 
             while (frame.time > glfwGetTime())
             {
-
                 float timeout_time = frame.time - glfwGetTime();
 
                 glfwWaitEventsTimeout(glm::clamp(timeout_time, 0.001f, std::numeric_limits<float>::max()));

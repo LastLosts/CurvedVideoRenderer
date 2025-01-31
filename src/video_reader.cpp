@@ -77,7 +77,7 @@ Frame VideoReader::read_frame()
 
         if (response < 0)
         {
-            std::cout << av_err2str(response) << std::endl;
+            std::cout << response << std::endl;
             throw std::runtime_error("Failed to decode packet");
         }
 
@@ -88,7 +88,7 @@ Frame VideoReader::read_frame()
         }
         else if (response < 0)
         {
-            std::cout << av_err2str(response) << std::endl;
+            std::cout << response << std::endl;
             throw std::runtime_error("Failed to recieve frame");
         }
 

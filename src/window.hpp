@@ -1,5 +1,7 @@
 #pragma once
+
 #include <GLFW/glfw3.h>
+#include <functional>
 
 class Window
 {
@@ -17,6 +19,5 @@ class Window
     void make_current_context();
     void swap_buffers();
 
-    // Incapsulation )))))
     GLFWwindow *window;
 };

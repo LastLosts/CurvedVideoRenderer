@@ -14,6 +14,8 @@ class PerspectiveCamera
     float move_speed{1.0f};
     float rotation_speed{50.0f};
 
+    void set_aspect(float aspect) noexcept { m_aspect = aspect; };
+
     [[nodiscard]] glm::mat4 projection() const noexcept;
     [[nodiscard]] glm::mat4 view() noexcept;
 
