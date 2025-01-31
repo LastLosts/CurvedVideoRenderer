@@ -47,7 +47,7 @@ void ImageRenderer::render(const Mesh &mesh, const Frame &frame, PerspectiveCame
 
     glBindTexture(GL_TEXTURE_2D, m_texture);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frame.width, frame.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, frame.data.data());
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frame.width, frame.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, frame.data);
     glGenerateMipmap(GL_TEXTURE_2D);
 
     glBindVertexArray(mesh.vertex_array());

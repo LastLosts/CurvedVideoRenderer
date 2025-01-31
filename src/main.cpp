@@ -4,7 +4,6 @@
 
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
-#include <vector>
 
 #include "glfw_context.hpp"
 #include "image_renderer.hpp"
@@ -12,13 +11,13 @@
 #include "perspective_camera.hpp"
 #include "window.hpp"
 
-constexpr uint32_t window_width = 800;
-constexpr uint32_t window_height = 800;
+constexpr uint32_t initial_window_width = 800;
+constexpr uint32_t initial_window_height = 800;
 
 #include "video_reader.hpp"
 
 static float delta_time = 0.016f;
-static PerspectiveCamera camera{45.0f, ((float)window_width / (float)window_height), 0.01f, 100.0f};
+static PerspectiveCamera camera{45.0f, ((float)initial_window_width / (float)initial_window_height), 0.01f, 100.0f};
 static bool quit = false;
 
 static void resize_callback(GLFWwindow *window, int width, int height)
@@ -34,7 +33,7 @@ static void scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
 
 static void mouse_callback(GLFWwindow *window, double xpos, double ypos)
 {
-    static float last_x = window_width / 2.0f, last_y = window_height / 2.0f;
+    static float last_x = initial_window_width / 2.0f, last_y = initial_window_height / 2.0f;
 
     float xoffset = xpos - last_x;
     float yoffset = ypos - last_y;
@@ -73,7 +72,7 @@ int main(int argc, char **argv)
     try
     {
         GlfwContext glfw{};
-        Window window{window_width, window_height, "Helo"};
+        Window window{initial_window_width, initial_window_height, "Helo"};
 
         window.make_current_context();
 

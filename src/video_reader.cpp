@@ -98,7 +98,7 @@ Frame VideoReader::read_frame()
 
     result.width = m_frame->width;
     result.height = m_frame->height;
-    result.data.resize(m_frame->width * m_frame->height * 4);
+    result.data = (uint8_t *)malloc(m_frame->width * m_frame->height * 4);
     result.time = m_frame->pts * (double)m_format_ctx->streams[m_video_stream_index]->time_base.num /
                   (double)m_format_ctx->streams[m_video_stream_index]->time_base.den;
 
@@ -112,7 +112,7 @@ Frame VideoReader::read_frame()
         throw std::runtime_error("Couldn't initialize sw scaler\n");
     }
 
-    uint8_t *dest[4] = {result.data.data(), NULL, NULL, NULL};
+    uint8_t *dest[4] = {result.data, NULL, NULL, NULL};
     int dest_linesize[4] = {m_frame->width * 4, 0, 0, 0};
     sws_scale(m_sws_ctx, m_frame->data, m_frame->linesize, 0, m_frame->height, dest, dest_linesize);
 
