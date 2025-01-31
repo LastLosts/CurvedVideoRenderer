@@ -62,8 +62,14 @@ static void process_input(PerspectiveCamera &camera, GLFWwindow *window)
         quit = true;
 }
 
-int main()
+int main(int argc, char **argv)
 {
+    if (argc != 2)
+    {
+        std::cout << "Usage:\n renderer [path to video]" << std::endl;
+        return -1;
+    }
+
     try
     {
         GlfwContext glfw{};
@@ -83,7 +89,7 @@ int main()
         }
 
         ImageRenderer image_renderer{};
-        VideoReader video_reader{"./assets/wide-test.mp4"};
+        VideoReader video_reader{argv[1]};
 
         Mesh curved = generate_mesh_curved_plane(1000, 300, 260.0f);
 
