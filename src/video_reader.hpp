@@ -23,7 +23,10 @@ class VideoReader
 
     Frame read_frame();
 
-    [[nodiscard]] double video_duration() const noexcept { return m_video_duration; }
+    /*[[nodiscard]] double video_duration() const noexcept { return m_video_duration; }*/
+
+    // Returns if video ended or not, only works if you read frames
+    [[nodiscard]] double video_end() const noexcept { return m_video_end; }
 
   private:
     AVFormatContext *m_format_ctx{nullptr};
@@ -34,5 +37,6 @@ class VideoReader
 
     int m_video_stream_index;
 
-    double m_video_duration;
+    /*double m_video_duration;*/
+    bool m_video_end;
 };

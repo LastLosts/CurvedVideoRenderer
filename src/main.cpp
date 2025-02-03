@@ -95,36 +95,28 @@ int main(int argc, char **argv)
 
         Mesh curved = generate_mesh_curved_plane(1000, 300, 260.0f);
 
-        Frame frame;
+        Frame frame = video_reader.read_frame();
+
+        bool same_frame = false;
+        glfwSetTime(0.0);
 
         // TODO: Separate thread for loading video
         while (window.is_open() && !quit)
         {
-            static bool first_frame = true;
-            if (first_frame)
-            {
-                glfwSetTime(0.0);
-                first_frame = false;
-            }
+            bool video_end = video_reader.video_end();
 
-            bool video_end = video_reader.video_duration() <= glfwGetTime(), same_frame = false;
-
-            if (!video_end)
+            if (frame.play_time < glfwGetTime() && !video_end)
             {
                 frame = video_reader.read_frame();
                 same_frame = false;
             }
 
-            // TODO: Think more about this
-            while ((frame.play_time > glfwGetTime() || video_end) && !quit && window.is_open())
-            {
-                image_renderer.render(curved, frame, camera, same_frame);
-                same_frame = true;
+            image_renderer.render(curved, frame, camera, same_frame);
+            same_frame = true;
 
-                process_input(camera, window.window);
-                window.swap_buffers();
-                glfwPollEvents();
-            }
+            process_input(camera, window.window);
+            window.swap_buffers();
+            glfwPollEvents();
         }
     }
     catch (const std::exception &e)

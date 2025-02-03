@@ -3,7 +3,7 @@
 #include <iostream>
 #include <stdexcept>
 
-VideoReader::VideoReader(const char *filename) : m_video_stream_index{-1}
+VideoReader::VideoReader(const char *filename) : m_video_stream_index{-1}, m_video_end{false}
 {
     m_format_ctx = avformat_alloc_context();
     if (!m_format_ctx)
@@ -59,9 +59,11 @@ VideoReader::VideoReader(const char *filename) : m_video_stream_index{-1}
     if (!m_packet)
         throw std::runtime_error("Failed to alloc packet");
 
-    m_video_duration = m_format_ctx->streams[m_video_stream_index]->duration *
-                       (double)m_format_ctx->streams[m_video_stream_index]->time_base.num /
-                       (double)m_format_ctx->streams[m_video_stream_index]->time_base.den;
+    /*m_video_duration = m_format_ctx->streams[m_video_stream_index]->duration **/
+    /*                   (double)m_format_ctx->streams[m_video_stream_index]->time_base.num /*/
+    /*                   (double)m_format_ctx->streams[m_video_stream_index]->time_base.den;*/
+
+    /*std::cout << m_format_ctx->streams[m_video_stream_index]->duration << std::endl << std::endl;*/
 }
 VideoReader::~VideoReader()
 {
@@ -105,6 +107,8 @@ Frame VideoReader::read_frame()
         av_packet_unref(m_packet);
         break;
     }
+
+    m_video_end = (m_frame->duration == m_format_ctx->streams[m_video_stream_index]->duration);
 
     result.width = m_frame->width;
     result.height = m_frame->height;
