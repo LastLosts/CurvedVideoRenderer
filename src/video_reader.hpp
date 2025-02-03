@@ -23,6 +23,8 @@ class VideoReader
 
     Frame read_frame();
 
+    [[nodiscard]] double video_duration() const noexcept { return m_video_duration; }
+
   private:
     AVFormatContext *m_format_ctx{nullptr};
     AVCodecContext *m_codec_ctx{nullptr};
@@ -31,4 +33,6 @@ class VideoReader
     SwsContext *m_sws_ctx{nullptr};
 
     int m_video_stream_index;
+
+    double m_video_duration;
 };

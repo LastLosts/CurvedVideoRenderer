@@ -1,4 +1,5 @@
 #include "video_reader.hpp"
+#include "libavformat/avformat.h"
 #include <iostream>
 #include <stdexcept>
 
@@ -12,6 +13,11 @@ VideoReader::VideoReader(const char *filename) : m_video_stream_index{-1}
     {
         std::cout << "Filename: " << filename << std::endl;
         throw std::runtime_error("Failed to open file");
+    }
+
+    if (avformat_find_stream_info(m_format_ctx, nullptr) < 0)
+    {
+        throw std::runtime_error("Failed to find stream info");
     }
 
     bool found_video_stream = false;
@@ -52,6 +58,10 @@ VideoReader::VideoReader(const char *filename) : m_video_stream_index{-1}
     m_packet = av_packet_alloc();
     if (!m_packet)
         throw std::runtime_error("Failed to alloc packet");
+
+    m_video_duration = m_format_ctx->streams[m_video_stream_index]->duration *
+                       (double)m_format_ctx->streams[m_video_stream_index]->time_base.num /
+                       (double)m_format_ctx->streams[m_video_stream_index]->time_base.den;
 }
 VideoReader::~VideoReader()
 {
@@ -98,9 +108,9 @@ Frame VideoReader::read_frame()
 
     result.width = m_frame->width;
     result.height = m_frame->height;
-    result.data = (uint8_t *)malloc(m_frame->width * m_frame->height * 4);
-    result.time = m_frame->pts * (double)m_format_ctx->streams[m_video_stream_index]->time_base.num /
-                  (double)m_format_ctx->streams[m_video_stream_index]->time_base.den;
+    result.data.resize(m_frame->width * m_frame->height * 4);
+    result.play_time = m_frame->pts * (double)m_format_ctx->streams[m_video_stream_index]->time_base.num /
+                       (double)m_format_ctx->streams[m_video_stream_index]->time_base.den;
 
     if (!m_sws_ctx)
     {
@@ -112,7 +122,7 @@ Frame VideoReader::read_frame()
         throw std::runtime_error("Couldn't initialize sw scaler\n");
     }
 
-    uint8_t *dest[4] = {result.data, NULL, NULL, NULL};
+    uint8_t *dest[4] = {result.data.data(), NULL, NULL, NULL};
     int dest_linesize[4] = {m_frame->width * 4, 0, 0, 0};
     sws_scale(m_sws_ctx, m_frame->data, m_frame->linesize, 0, m_frame->height, dest, dest_linesize);
 

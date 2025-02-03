@@ -11,12 +11,11 @@
 #include "perspective_camera.hpp"
 #include "window.hpp"
 
+#include "video_reader.hpp"
+
 constexpr uint32_t initial_window_width = 800;
 constexpr uint32_t initial_window_height = 800;
 
-#include "video_reader.hpp"
-
-static float delta_time = 0.016f;
 static PerspectiveCamera camera{45.0f, ((float)initial_window_width / (float)initial_window_height), 0.01f, 100.0f};
 static bool quit = false;
 
@@ -41,6 +40,7 @@ static void mouse_callback(GLFWwindow *window, double xpos, double ypos)
     last_x = xpos;
     last_y = ypos;
 
+    // This only happens on first frame when cursor jumps to center
     if (xoffset >= 100.0f)
         return;
     if (yoffset >= 100.0f)
@@ -61,6 +61,7 @@ static void process_input(PerspectiveCamera &camera, GLFWwindow *window)
         quit = true;
 }
 
+// TODO: Vsync off??
 int main(int argc, char **argv)
 {
     if (argc != 2)
@@ -75,6 +76,7 @@ int main(int argc, char **argv)
         Window window{initial_window_width, initial_window_height, "Helo"};
 
         window.make_current_context();
+        glfwSwapInterval(1);
 
         glfwSetFramebufferSizeCallback(window.window, resize_callback);
         glfwSetScrollCallback(window.window, scroll_callback);
@@ -88,10 +90,14 @@ int main(int argc, char **argv)
         }
 
         ImageRenderer image_renderer{};
+
         VideoReader video_reader{argv[1]};
 
         Mesh curved = generate_mesh_curved_plane(1000, 300, 260.0f);
 
+        Frame frame;
+
+        // TODO: Separate thread for loading video
         while (window.is_open() && !quit)
         {
             static bool first_frame = true;
@@ -100,25 +106,25 @@ int main(int argc, char **argv)
                 glfwSetTime(0.0);
                 first_frame = false;
             }
-            float start = glfwGetTime();
 
-            process_input(camera, window.window);
-            Frame frame = video_reader.read_frame();
+            bool video_end = video_reader.video_duration() <= glfwGetTime(), same_frame = false;
 
-            while (frame.time > glfwGetTime())
+            if (!video_end)
             {
-                float timeout_time = frame.time - glfwGetTime();
-
-                glfwWaitEventsTimeout(glm::clamp(timeout_time, 0.001f, std::numeric_limits<float>::max()));
+                frame = video_reader.read_frame();
+                same_frame = false;
             }
 
-            image_renderer.render(curved, frame, camera);
+            // TODO: Think more about this
+            while ((frame.play_time > glfwGetTime() || video_end) && !quit && window.is_open())
+            {
+                image_renderer.render(curved, frame, camera, same_frame);
+                same_frame = true;
 
-            window.swap_buffers();
-            glfwPollEvents();
-            float end = glfwGetTime();
-
-            delta_time = end - start;
+                process_input(camera, window.window);
+                window.swap_buffers();
+                glfwPollEvents();
+            }
         }
     }
     catch (const std::exception &e)

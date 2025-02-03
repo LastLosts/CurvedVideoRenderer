@@ -21,7 +21,7 @@ ImageRenderer::ImageRenderer() : m_material{vertex_shader_path, fragment_shader_
     glEnable(GL_DEPTH_TEST);
 }
 
-void ImageRenderer::render(const Mesh &mesh, const Frame &frame, PerspectiveCamera &camera)
+void ImageRenderer::render(const Mesh &mesh, const Frame &frame, PerspectiveCamera &camera, bool same_frame)
 {
     glm::mat4 model{1.0f};
     glm::mat4 projection = camera.projection();
@@ -47,8 +47,12 @@ void ImageRenderer::render(const Mesh &mesh, const Frame &frame, PerspectiveCame
 
     glBindTexture(GL_TEXTURE_2D, m_texture);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frame.width, frame.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, frame.data);
-    glGenerateMipmap(GL_TEXTURE_2D);
+    if (!same_frame)
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frame.width, frame.height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+                     frame.data.data());
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
 
     glBindVertexArray(mesh.vertex_array());
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.element_buffer());

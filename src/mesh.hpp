@@ -13,7 +13,6 @@ class Mesh
     Mesh(const std::vector<Vertex> &vertices, const std::vector<uint32_t> &indices);
     ~Mesh();
 
-    // TODO: Define those will need them soon
     Mesh(const Mesh &) = delete;
     Mesh(Mesh &&other);
     Mesh &operator=(const Mesh &) = delete;
